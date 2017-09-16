@@ -1,0 +1,15 @@
+[{
+    "constant":true,
+    "inputs":[{
+        "name":"inputStream",
+        "type":"uint256[]"
+    }],
+    "name":"call",
+    "outputs":[{
+        "name":"outputStream",
+        "type":"uint256[]"
+    }],
+    "payable":false,
+    "stateMutability":"view",
+    "type":"function"
+}]
