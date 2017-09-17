@@ -30,7 +30,7 @@
     return(0x0, 0x0)
   stop
 
-  contract_code: assembly {
+  contract_code: {
       jumpi(function_selector, iszero(callvalue))
       revert(0x0, 0x0) // optimization -> 0x0 dup1 revert
     function_selector:
@@ -88,9 +88,10 @@
       // ,>,[-<+>].
       loop_1:
         // -> load cell
+        end_loop_1
         mload(add(mload(0x44), 0x6c3fd336b49dcb1c57dd4fbeaf5f898320b0da06a5ef64e798c6497600bb79f2))
         iszero
-        jumpi end_loop_1
+        jumpi
         //     v
         // ,>,[-<+>].
         // -> calculate location of cell
