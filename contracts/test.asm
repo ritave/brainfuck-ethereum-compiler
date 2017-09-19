@@ -6,19 +6,21 @@
 // Written using Solidity ASM notation
 //
 // Memory format (inclusive ranges):
-// 0x00-0x40: scratch space
-// 0x41: inputStream size
-// 0x42: inputStream current position
-// calldataload(mload(0x42)): current inputStream word
-// 0x43: outputStream size
-// keccak256(0x43)-add(keccak256(0x43), mload(0x43)) (+1 for inclusive): outputStream words
-// 0x44: current brainfuck cell
-// keccak256(0x44)-infinity: brainfuck cells
+// 0x00-0x3F: scratch space
+// 0x40: inputStream size
+// 0x60: inputStream current position
+// calldataload(mload(0x60)): current inputStream word
+// 0x80: outputStream size
+// keccak256(0x80)-add(keccak256(0x80), mload(0x80)) (+1 for inclusive): outputStream words
+// 0xA0: current brainfuck cell
+// keccak256(0xA0)-infinity: brainfuck cells
 //
-// web3.sha3('0x43', {encoding: 'hex'})
-// "0x017e667f4b8c174291d1543c466717566e206df1bfd6f30271055ddafdb18f72"
-// web3.sha3('0x44', {encoding: 'hex'})
-// "0x6c3fd336b49dcb1c57dd4fbeaf5f898320b0da06a5ef64e798c6497600bb79f2"
+// web3.sha3('0x80', {encoding: 'hex'})
+// "0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421"
+// web3.sha3('0xA0', {encoding: 'hex'})
+// "0xfec18a9ddb06077929803cdc92f56c05e3eaa46edb2fa1ae550563b37906c77c"
+//
+// TODO: That memory format doesn't work because memory is a byte array instead of mapping :/ Change it into linked-lists
 
 // ctor
 // Check if no money inserted
@@ -51,15 +53,15 @@
       // get inputStream size
       calldataload
       // now stack is [size, offset]
-      0x41
-      mstore // save size at 0x41
+      0x40
+      mstore // save size at 0x40
       // offset includes size word, first input is 32 bytes after
       0x20
       add
-      0x42
-      mstore // save first input offset at 0x42
+      0x60
+      mstore // save first input offset at 0x60
       // initial output stream size is zero, but the memory is zeroed by default
-      // mstore(0x43, 0x0)
+      // mstore(0x80, 0x0)
     
     execution_context:
       // real brainfuck now!
@@ -67,35 +69,35 @@
       // ,>,[-<+>].
       // -> load input
       // TODO: Security when array overflows
-      calldataload(mload(0x42))
+      calldataload(mload(0x60))
       // -> store input in cell
-      add(mload(0x44), 0x6c3fd336b49dcb1c57dd4fbeaf5f898320b0da06a5ef64e798c6497600bb79f2)
+      add(mload(0xA0), 0xfec18a9ddb06077929803cdc92f56c05e3eaa46edb2fa1ae550563b37906c77c)
       mstore // stack: [cell_location, input_word]
       // -> increase input stream counter
-      mstore(0x42, add(mload(0x42), 0x20))
+      mstore(0x60, add(mload(0x60), 0x20))
       //  v
       // ,>,[-<+>].
       // -> move the cell counter to the right
-      mstore(0x44, add(mload(0x44), 0x20))
+      mstore(0xA0, add(mload(0xA0), 0x20))
       //   v
       // ,>,[-<+>].
-      calldataload(mload(0x42))
-      add(mload(0x44), 0x6c3fd336b49dcb1c57dd4fbeaf5f898320b0da06a5ef64e798c6497600bb79f2)
+      calldataload(mload(0x60))
+      add(mload(0xA0), 0xfec18a9ddb06077929803cdc92f56c05e3eaa46edb2fa1ae550563b37906c77c)
       mstore
-      mstore(0x42, add(mload(0x42), 0x20))
+      mstore(0x60, add(mload(0x60), 0x20))
       
       //    v
       // ,>,[-<+>].
       loop_1:
         // -> load cell
         end_loop_1
-        mload(add(mload(0x44), 0x6c3fd336b49dcb1c57dd4fbeaf5f898320b0da06a5ef64e798c6497600bb79f2))
+        mload(add(mload(0xA0), 0xfec18a9ddb06077929803cdc92f56c05e3eaa46edb2fa1ae550563b37906c77c))
         iszero
         jumpi
         //     v
         // ,>,[-<+>].
         // -> calculate location of cell
-        add(mload(0x44), 0x6c3fd336b49dcb1c57dd4fbeaf5f898320b0da06a5ef64e798c6497600bb79f2) 
+        add(mload(0xA0), 0xfec18a9ddb06077929803cdc92f56c05e3eaa46edb2fa1ae550563b37906c77c) 
         dup1 // [cell_location, cell_location]
         mload // [cell_data, cell_location]
         // -> actual substraction
@@ -108,10 +110,10 @@
         //      v
         // ,>,[-<+>].
         // TODO: Check for underflow
-        mstore(0x44, sub(mload(0x44), 0x20))
+        mstore(0xA0, sub(mload(0xA0), 0x20))
         //       v
         // ,>,[-<+>].
-        add(mload(0x44), 0x6c3fd336b49dcb1c57dd4fbeaf5f898320b0da06a5ef64e798c6497600bb79f2) 
+        add(mload(0xA0), 0xfec18a9ddb06077929803cdc92f56c05e3eaa46edb2fa1ae550563b37906c77c) 
         dup1 // [cell_location, cell_location]
         mload // [cell_data, cell_location]
         // -> actual substraction
@@ -122,7 +124,7 @@
         mstore
         //        v
         // ,>,[-<+>].
-        mstore(0x44, add(mload(0x44), 0x20))
+        mstore(0xA0, add(mload(0xA0), 0x20))
         //         v
         // ,>,[-<+>].
         jump(loop_1)
@@ -131,20 +133,20 @@
       //          v
       // ,>,[-<+>].
       // -> get cell's contents
-      mload(add(mload(0x44), 0x6c3fd336b49dcb1c57dd4fbeaf5f898320b0da06a5ef64e798c6497600bb79f2))
+      mload(add(mload(0xA0), 0xfec18a9ddb06077929803cdc92f56c05e3eaa46edb2fa1ae550563b37906c77c))
       // -> location of place to put character in the outputStream
-      add(mload(0x43), 0x017e667f4b8c174291d1543c466717566e206df1bfd6f30271055ddafdb18f72)
+      add(mload(0x80), 0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421)
       // -> store the contents to the outputStream
       mstore    
       // -> increase outputStream size
-      mstore(0x43, add(mload(0x43), 0x1))
+      mstore(0x80, add(mload(0x80), 0x1))
 
     call_function_return:
       // copy the length of outputStream to just before it's data
-      // notice the "1" at the end of the hex insteand of "2"
-      0x017e667f4b8c174291d1543c466717566e206df1bfd6f30271055ddafdb18f71
+      // notice the "0" at the end of the hex insteand of "2"
+      0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b401
       dup1 // [beginning, beginning]
-      mload(0x43)
+      mload(0x80)
       dup1 // [length, length, beginning, beginning]
       swap2 // [beginning, length, length, beginning]
       mstore // [length, beginning]
